@@ -3,9 +3,10 @@ import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Botao, Campo, Carregando, Mensagem, Opcoes, Vazio } from '../components/ui';
+import Calendario from '../components/Calendario';
 import { api } from '../services/api';
 import { avisar } from '../utils/dialogo';
-import { brParaIso, isoParaBr, mascaraData } from '../utils/formatacao';
+import { diaCurto, isoParaBr } from '../utils/formatacao';
 import { cores, espaco, fonte, PRIORIDADES, raio, TIPOS } from '../theme';
 
 const OPCOES_TIPO = Object.entries(TIPOS).map(([valor, t]) => ({ valor, rotulo: t.rotulo }));
@@ -13,13 +14,14 @@ const OPCOES_PRIORIDADE = Object.entries(PRIORIDADES).map(([valor, p]) => ({ val
 
 export default function ChamadoFormScreen({ navigation, route }) {
   const id = route.params?.id;
-  const [form, setForm] = useState({ cliente_id: null, tipo: 'manutencao', prioridade: 'media', data: '', valor: '', descricao: '' });
+  const [form, setForm] = useState({ cliente_id: null, tipo: 'manutencao', prioridade: 'media', data_agendada: '', valor: '', descricao: '' });
   const [clientes, setClientes] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erros, setErros] = useState({});
   const [erroGeral, setErroGeral] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [seletorAberto, setSeletorAberto] = useState(false);
+  const [calendarioAberto, setCalendarioAberto] = useState(false);
   const [buscaCliente, setBuscaCliente] = useState('');
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function ChamadoFormScreen({ navigation, route }) {
             cliente_id: chamado.cliente_id,
             tipo: chamado.tipo,
             prioridade: chamado.prioridade,
-            data: isoParaBr(chamado.data_agendada),
+            data_agendada: chamado.data_agendada,
             valor: String(chamado.valor).replace('.', ','),
             descricao: chamado.descricao,
           });
@@ -55,10 +57,10 @@ export default function ChamadoFormScreen({ navigation, route }) {
 
   async function salvar() {
     const novosErros = {};
-    const dataIso = brParaIso(form.data);
+    const dataIso = form.data_agendada;
     const valor = form.valor.trim() === '' ? 0 : Number(form.valor.replace(/\./g, '').replace(',', '.'));
     if (!form.cliente_id) novosErros.cliente_id = 'Selecione o cliente.';
-    if (!dataIso) novosErros.data_agendada = 'Informe uma data válida (DD/MM/AAAA).';
+    if (!dataIso) novosErros.data_agendada = 'Escolha a data do atendimento.';
     if (!Number.isFinite(valor) || valor < 0) novosErros.valor = 'Informe um valor válido.';
     if (form.descricao.trim().length < 5) novosErros.descricao = 'Descreva o serviço (mínimo 5 caracteres).';
     setErros(novosErros);
@@ -123,26 +125,28 @@ export default function ChamadoFormScreen({ navigation, route }) {
         <Opcoes rotulo="Tipo de serviço" opcoes={OPCOES_TIPO} valor={form.tipo} onChange={alterar('tipo')} erro={erros.tipo} />
         <Opcoes rotulo="Prioridade" opcoes={OPCOES_PRIORIDADE} valor={form.prioridade} onChange={alterar('prioridade')} erro={erros.prioridade} />
 
-        <View style={styles.duasColunas}>
-          <Campo
-            style={{ flex: 1 }}
-            rotulo="Data"
-            value={form.data}
-            onChangeText={(v) => alterar('data')(mascaraData(v))}
-            erro={erros.data_agendada}
-            keyboardType="number-pad"
-            placeholder="DD/MM/AAAA"
-          />
-          <Campo
-            style={{ flex: 1 }}
-            rotulo="Valor (R$)"
-            value={form.valor}
-            onChangeText={(v) => alterar('valor')(v.replace(/[^\d,]/g, ''))}
-            erro={erros.valor}
-            keyboardType="decimal-pad"
-            placeholder="0,00"
-          />
-        </View>
+        <Text style={styles.rotulo}>DATA DO ATENDIMENTO</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Escolher a data do atendimento"
+          onPress={() => setCalendarioAberto(true)}
+          style={[styles.seletor, erros.data_agendada && { borderColor: cores.perigo }]}
+        >
+          <Text style={form.data_agendada ? styles.seletorTexto : styles.seletorPlaceholder}>
+            {form.data_agendada ? `${diaCurto(form.data_agendada)}, ${isoParaBr(form.data_agendada)}` : 'Toque para escolher no calendário'}
+          </Text>
+          <Ionicons name="calendar-outline" size={20} color={cores.primaria} />
+        </Pressable>
+        {erros.data_agendada ? <Text style={styles.erro}>{erros.data_agendada}</Text> : <View style={{ height: espaco.md }} />}
+
+        <Campo
+          rotulo="Valor (R$)"
+          value={form.valor}
+          onChangeText={(v) => alterar('valor')(v.replace(/[^\d,]/g, ''))}
+          erro={erros.valor}
+          keyboardType="decimal-pad"
+          placeholder="0,00"
+        />
 
         <Campo
           rotulo="Descrição do serviço"
@@ -159,6 +163,27 @@ export default function ChamadoFormScreen({ navigation, route }) {
 
         <Botao titulo={id ? 'Salvar alterações' : 'Abrir chamado'} onPress={salvar} carregando={salvando} style={{ marginTop: espaco.md }} />
       </ScrollView>
+
+      <Modal visible={calendarioAberto} transparent animationType="fade" onRequestClose={() => setCalendarioAberto(false)}>
+        <View style={styles.fundoEscuro}>
+          <View style={styles.janelaCalendario}>
+            <View style={styles.modalTopo}>
+              <Text style={styles.modalTitulo}>Data do atendimento</Text>
+              <Pressable onPress={() => setCalendarioAberto(false)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fechar calendário">
+                <Ionicons name="close" size={26} color={cores.texto} />
+              </Pressable>
+            </View>
+            <Calendario
+              valor={form.data_agendada}
+              onSelecionar={(iso) => {
+                alterar('data_agendada')(iso);
+                setErros((e) => ({ ...e, data_agendada: undefined }));
+                setCalendarioAberto(false);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={seletorAberto} animationType="slide" onRequestClose={() => setSeletorAberto(false)}>
         <SafeAreaView style={styles.modal}>
@@ -213,7 +238,8 @@ const styles = StyleSheet.create({
   seletorTexto: { fontSize: fonte.corpo, color: cores.texto, fontWeight: '500', flexShrink: 1 },
   seletorPlaceholder: { fontSize: fonte.corpo, color: cores.textoSuave },
   erro: { color: cores.perigo, fontSize: fonte.pequena, marginTop: espaco.xs, marginBottom: espaco.md },
-  duasColunas: { flexDirection: 'row', gap: espaco.md },
+  fundoEscuro: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.5)', justifyContent: 'center', padding: espaco.lg },
+  janelaCalendario: { backgroundColor: cores.superficie, borderRadius: raio.lg, width: '100%', maxWidth: 420, alignSelf: 'center', overflow: 'hidden' },
   ajuda: { color: cores.textoSuave, fontSize: 13 },
   modal: { flex: 1, backgroundColor: cores.fundo },
   modalTopo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: espaco.lg },

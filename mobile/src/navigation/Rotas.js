@@ -15,7 +15,6 @@ import ChamadoDetalheScreen from '../screens/ChamadoDetalheScreen';
 import ChamadoFormScreen from '../screens/ChamadoFormScreen';
 import ClientesScreen from '../screens/ClientesScreen';
 import ClienteFormScreen from '../screens/ClienteFormScreen';
-import AssistenteScreen from '../screens/AssistenteScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,7 +28,6 @@ const ICONES = {
   Painel: 'speedometer-outline',
   Chamados: 'clipboard-outline',
   Clientes: 'people-outline',
-  Assistente: 'sparkles-outline',
 };
 
 function BotaoSair() {
@@ -62,7 +60,6 @@ function Abas() {
       <Tab.Screen name="Painel" component={DashboardScreen} options={{ title: 'Painel', headerRight: () => <BotaoSair /> }} />
       <Tab.Screen name="Chamados" component={ChamadosScreen} />
       <Tab.Screen name="Clientes" component={ClientesScreen} />
-      <Tab.Screen name="Assistente" component={AssistenteScreen} options={{ title: 'Assistente IA' }} />
     </Tab.Navigator>
   );
 }

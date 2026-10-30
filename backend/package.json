@@ -1,7 +1,7 @@
 {
   "name": "friocerto-bff",
   "version": "1.0.0",
-  "description": "API BFF do FrioCerto: autenticação, regras de negócio, persistência e integrações (ViaCEP, BrasilAPI, Open-Meteo, Gemini)",
+  "description": "API BFF do FrioCerto: autenticação, regras de negócio, persistência e integrações (ViaCEP, BrasilAPI, Open-Meteo)",
   "main": "src/server.js",
   "type": "commonjs",
   "engines": {

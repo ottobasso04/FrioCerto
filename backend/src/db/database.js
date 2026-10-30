@@ -50,26 +50,6 @@ db.exec(`
     atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS conversas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    titulo TEXT NOT NULL,
-    criado_em TEXT NOT NULL DEFAULT (datetime('now')),
-    atualizado_em TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS mensagens (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    conversa_id INTEGER NOT NULL REFERENCES conversas(id) ON DELETE CASCADE,
-    papel TEXT NOT NULL CHECK (papel IN ('usuario', 'assistente')),
-    texto TEXT NOT NULL,
-    funcoes TEXT,
-    modelo TEXT,
-    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_conversas_usuario ON conversas (usuario_id, atualizado_em);
-  CREATE INDEX IF NOT EXISTS idx_mensagens_conversa ON mensagens (conversa_id, id);
   CREATE INDEX IF NOT EXISTS idx_chamados_data ON chamados (data_agendada);
   CREATE INDEX IF NOT EXISTS idx_chamados_status ON chamados (status);
 `);

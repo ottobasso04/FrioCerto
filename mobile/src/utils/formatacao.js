@@ -13,17 +13,6 @@ export function isoParaBr(iso) {
   return `${d}/${m}/${a}`;
 }
 
-export function brParaIso(br) {
-  const digitos = somenteDigitos(br);
-  if (digitos.length !== 8) return null;
-  const d = Number(digitos.slice(0, 2));
-  const m = Number(digitos.slice(2, 4));
-  const a = Number(digitos.slice(4));
-  const data = new Date(Date.UTC(a, m - 1, d));
-  if (data.getUTCFullYear() !== a || data.getUTCMonth() !== m - 1 || data.getUTCDate() !== d) return null;
-  return `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
 const DIAS_CURTOS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 export function diaCurto(iso) {
@@ -47,7 +36,6 @@ function aplicarMascara(digitos, padrao) {
 }
 
 export const mascaraCep = (v) => aplicarMascara(somenteDigitos(v).slice(0, 8), '00000-000');
-export const mascaraData = (v) => aplicarMascara(somenteDigitos(v).slice(0, 8), '00/00/0000');
 
 export function mascaraTelefone(v) {
   const d = somenteDigitos(v).slice(0, 11);

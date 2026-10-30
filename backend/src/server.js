@@ -13,5 +13,4 @@ app.listen(config.port, '0.0.0.0', () => {
 
   console.log(`FrioCerto BFF rodando na porta ${config.port}`);
   ips.forEach((url) => console.log(`  Acesse pela rede: ${url}`));
-  if (!config.geminiApiKey) console.warn('  Aviso: GEMINI_API_KEY não definida, o assistente ficará indisponível.');
 });

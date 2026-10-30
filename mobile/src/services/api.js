@@ -1,7 +1,12 @@
+import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 function descobrirUrlDaApi() {
-  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '');
+  const urlConfigurada = typeof process !== 'undefined' && process.env ? process.env.EXPO_PUBLIC_API_URL : undefined;
+  if (urlConfigurada) return urlConfigurada.replace(/\/$/, '');
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname) {
+    return `http://${window.location.hostname}:3333/api`;
+  }
   const hostUri = Constants.expoConfig?.hostUri;
   const host = hostUri ? hostUri.split(':')[0] : 'localhost';
   return `http://${host}:3333/api`;
@@ -98,10 +103,5 @@ export const api = {
 
   consultarCep: (cep) => requisitar('GET', `/externos/cep/${cep}`),
   consultarCnpj: (cnpj) => requisitar('GET', `/externos/cnpj/${cnpj}`),
-
-  perguntarAoAssistente: (mensagem, conversaId) =>
-    requisitar('POST', '/assistente', { mensagem, conversa_id: conversaId || undefined }, { timeoutMs: 90000 }),
-  listarConversas: () => requisitar('GET', '/assistente/conversas'),
-  obterConversa: (id) => requisitar('GET', `/assistente/conversas/${id}`),
-  excluirConversa: (id) => requisitar('DELETE', `/assistente/conversas/${id}`),
+  listarFeriados: (ano) => requisitar('GET', `/externos/feriados/${ano}`),
 };

@@ -4,8 +4,6 @@ const authService = require('../services/authService');
 const clienteService = require('../services/clienteService');
 const chamadoService = require('../services/chamadoService');
 const dashboardService = require('../services/dashboardService');
-const assistenteService = require('../services/gemini/assistenteService');
-const conversaService = require('../services/conversaService');
 const viaCep = require('../services/externos/viaCep');
 const brasilApi = require('../services/externos/brasilApi');
 const openMeteo = require('../services/externos/openMeteo');
@@ -46,13 +44,5 @@ rotas.get('/externos/cep/:cep', async (req, res) => res.json(await viaCep.consul
 rotas.get('/externos/cnpj/:cnpj', async (req, res) => res.json(await brasilApi.consultarCnpj(req.params.cnpj)));
 rotas.get('/externos/feriados/:ano', async (req, res) => res.json(await brasilApi.listarFeriados(req.params.ano)));
 rotas.get('/externos/clima', async (req, res) => res.json(await openMeteo.previsaoPorCidade(req.query.cidade, req.query.uf)));
-
-rotas.post('/assistente', async (req, res) => res.json(await assistenteService.conversar(req.body || {}, req.usuario)));
-rotas.get('/assistente/conversas', (req, res) => res.json(conversaService.listar(req.usuario.id)));
-rotas.get('/assistente/conversas/:id', (req, res) => res.json(conversaService.obter(req.params.id, req.usuario.id)));
-rotas.delete('/assistente/conversas/:id', (req, res) => {
-  conversaService.excluir(req.params.id, req.usuario.id);
-  res.status(204).end();
-});
 
 module.exports = rotas;

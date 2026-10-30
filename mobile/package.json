@@ -4,7 +4,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "setup": "expo install expo-status-bar expo-secure-store expo-constants @expo/vector-icons @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context react-dom react-native-web @expo/metro-runtime && expo install --fix",
+    "setup": "expo install react react-dom react-native react-native-web @expo/metro-runtime expo-status-bar expo-secure-store expo-constants @expo/vector-icons @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context && expo install --fix",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
